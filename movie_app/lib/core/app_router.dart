@@ -17,3 +17,15 @@ final appRouter = GoRouter(
             )),
   ],
 );
+
+
+/*
+ GoRoute(
+              path: 'movie/:id',
+              name: MovieScreen.screenName,
+              builder: (context, state) {
+                return MovieScreen(
+                    movieId: state.pathParameters['id'] ?? 'no-id');
+              })
+        ]),
+*/
