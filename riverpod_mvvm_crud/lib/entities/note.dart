@@ -1,4 +1,6 @@
-class Note {
+import 'package:equatable/equatable.dart';
+
+class Note extends Equatable {
   final int? id;
   final String title;
   final String content;
@@ -34,23 +36,7 @@ class Note {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Note &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          title == other.title &&
-          content == other.content &&
-          createdAt == other.createdAt &&
-          updatedAt == other.updatedAt;
-
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      title.hashCode ^
-      content.hashCode ^
-      createdAt.hashCode ^
-      updatedAt.hashCode;
+  List<Object?> get props => [id, title, content, createdAt, updatedAt];
 }
 
 extension NoteValidator on Note {

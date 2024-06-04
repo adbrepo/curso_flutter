@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/app_router.dart';
 import '../../entities/note.dart';
-import '../notifiers/providers.dart';
+import '../utils/base_screen_state.dart';
+import '../viewmodels/providers.dart';
 import '../utils/formatter.dart';
 import 'new_note.dart';
 
@@ -24,8 +25,17 @@ class _NoteDetailsScreenState extends ConsumerState<NoteDetailsScreen> {
   final _fabKey = GlobalKey<ExpandableFabState>();
 
   @override
+  void initState() {
+    super.initState();
+
+    ref
+        .read(noteDetailsViewModelProvider(widget.noteId).notifier)
+        .fetchNote(widget.noteId);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final note = ref.watch(noteDetailsProvider(widget.noteId));
+    final state = ref.watch(noteDetailsViewModelProvider(widget.noteId));
 
     return Scaffold(
       appBar: AppBar(
@@ -52,19 +62,19 @@ class _NoteDetailsScreenState extends ConsumerState<NoteDetailsScreen> {
           ),
         ],
       ),
-      body: note.when(
-        data: (note) {
-          if (note == null) {
+      body: state.screenState.when(
+        idle: () {
+          if (state.note == null) {
             return const Center(
               child: Text('Note not found'),
             );
           }
-          return _NoteDetails(note: note);
+          return _NoteDetails(note: state.note!);
         },
         loading: () => const Center(
           child: CircularProgressIndicator(),
         ),
-        error: (error, _) => Center(
+        error: (error) => Center(
           child: Text('Error: $error'),
         ),
       ),
@@ -76,7 +86,7 @@ class _NoteDetailsScreenState extends ConsumerState<NoteDetailsScreen> {
     _fabKey.currentState?.toggle();
 
     await ref
-        .read(noteDetailsProvider(widget.noteId).notifier)
+        .read(noteDetailsViewModelProvider(widget.noteId).notifier)
         .delete(widget.noteId);
 
     if (context.mounted) {

@@ -1,11 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../entities/note.dart';
+import '../../../entities/note.dart';
+import '../../utils/base_screen_state.dart';
 
 class NewNoteState {
-  final AsyncValue<Note?> note;
-  final bool isLoading;
-  final String? error;
+  final BaseScreenState screenState;
+  final Note? note;
   final bool titleError;
   final bool contentError;
   final bool isEditing;
@@ -13,9 +11,8 @@ class NewNoteState {
   final bool wasCreated;
 
   NewNoteState({
-    this.note = const AsyncValue.data(null),
-    this.isLoading = false,
-    this.error,
+    this.screenState = const BaseScreenState.idle(),
+    this.note,
     this.titleError = false,
     this.contentError = false,
     this.isEditing = false,
@@ -23,18 +20,16 @@ class NewNoteState {
   });
 
   NewNoteState copyWith({
-    AsyncValue<Note?>? note,
-    bool? isLoading,
-    String? error,
+    BaseScreenState? screenState,
+    Note? note,
     bool? titleError,
     bool? contentError,
     bool? isEditing,
     bool? wasCreated,
   }) {
     return NewNoteState(
+      screenState: screenState ?? this.screenState,
       note: note ?? this.note,
-      isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
       titleError: titleError ?? this.titleError,
       contentError: contentError ?? this.contentError,
       isEditing: isEditing ?? this.isEditing,

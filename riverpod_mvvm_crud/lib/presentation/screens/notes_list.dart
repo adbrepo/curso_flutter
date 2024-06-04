@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/app_router.dart';
 import '../../entities/note.dart';
-import '../notifiers/providers.dart';
+import '../utils/base_screen_state.dart';
+import '../viewmodels/providers.dart';
 import '../widgets/note_item.dart';
 import 'new_note.dart';
 import 'note_details.dart';
@@ -21,8 +22,15 @@ class NotesListScreen extends ConsumerStatefulWidget {
 
 class _NotesListScreenState extends ConsumerState<NotesListScreen> {
   @override
+  void initState() {
+    super.initState();
+
+    ref.read(notesListViewModelProvider.notifier).fetchNotes();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final notes = ref.watch(notesListProvider);
+    final state = ref.watch(notesListViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -32,10 +40,10 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         child: const Icon(Icons.add),
         onPressed: () => _onNewNoteTap(context),
       ),
-      body: notes.when(
-        data: (notes) {
+      body: state.screenState.when(
+        idle: () {
           return _NotesList(
-            notes: notes,
+            notes: state.notes,
             onRefresh: _onRefresh,
             onNoteTap: (note) => _onNoteTap(context, note.id ?? -1),
             onNoteEdit: (note) => _onNoteEditTap(context, note.id ?? -1),
@@ -45,7 +53,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         loading: () => const Center(
           child: CircularProgressIndicator(),
         ),
-        error: (error, _) => Center(
+        error: (error) => Center(
           child: Text('Error: $error'),
         ),
       ),
@@ -53,7 +61,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
   }
 
   Future<void> _onRefresh() async {
-    await ref.read(notesListProvider.notifier).refresh();
+    await ref.read(notesListViewModelProvider.notifier).refresh();
   }
 
   void _onNewNoteTap(BuildContext context) async {
@@ -89,7 +97,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
   }
 
   void _onNoteDismiss(BuildContext context, Note note) async {
-    await ref.read(notesListProvider.notifier).delete(note.id ?? -1);
+    await ref.read(notesListViewModelProvider.notifier).delete(note.id ?? -1);
   }
 }
 

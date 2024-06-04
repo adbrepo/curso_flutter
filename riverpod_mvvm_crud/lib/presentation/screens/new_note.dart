@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../notifiers/providers.dart';
+import '../utils/base_screen_state.dart';
+import '../viewmodels/providers.dart';
 
 class NewNoteScreen extends ConsumerStatefulWidget {
   static const name = 'NewNoteScreen';
@@ -22,8 +23,6 @@ class _NewNoteScreenState extends ConsumerState<NewNoteScreen> {
   bool _titleHasError = false;
   bool _contentHasError = false;
 
-  late final _provider = newNoteProvider(widget.noteId);
-
   @override
   void dispose() {
     super.dispose();
@@ -35,6 +34,10 @@ class _NewNoteScreenState extends ConsumerState<NewNoteScreen> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.noteId != null) {
+      ref.read(newNoteViewModelProvider.notifier).fetchNote(widget.noteId!);
+    }
 
     // Clear the text fields when the user taps in
     _titleController.addListener(() {
@@ -49,7 +52,7 @@ class _NewNoteScreenState extends ConsumerState<NewNoteScreen> {
   Widget build(BuildContext context) {
     _setupStateListener();
 
-    final state = ref.watch(_provider);
+    final state = ref.watch(newNoteViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -64,7 +67,7 @@ class _NewNoteScreenState extends ConsumerState<NewNoteScreen> {
       body: Stack(
         children: [
           _buildForm(),
-          if (state.isLoading)
+          if (state.screenState.isLoading)
             const Center(
               child: CircularProgressIndicator(),
             ),
@@ -78,8 +81,8 @@ class _NewNoteScreenState extends ConsumerState<NewNoteScreen> {
   // For example, if the note was saved successfully, we show a dialog and
   // navigate back to the previous screen.
   void _setupStateListener() {
-    ref.listen(_provider, (_, state) {
-      if (state.error != null) {
+    ref.listen(newNoteViewModelProvider, (_, state) {
+      if (state.screenState.isError) {
         //_showDialog('Error', state.error.toString());
         setState(() {
           _titleHasError = state.titleError;
@@ -95,10 +98,10 @@ class _NewNoteScreenState extends ConsumerState<NewNoteScreen> {
         });
       }
 
-      if (state.note.value != null) {
+      if (state.note != null) {
         // If the note is fetched, fill the text fields
-        _titleController.text = state.note.value!.title;
-        _contentController.text = state.note.value!.content;
+        _titleController.text = state.note!.title;
+        _contentController.text = state.note!.content;
       }
     });
   }
@@ -144,7 +147,7 @@ class _NewNoteScreenState extends ConsumerState<NewNoteScreen> {
     // Hide the keyboard
     FocusManager.instance.primaryFocus?.unfocus();
 
-    ref.read(_provider.notifier).createOrEditNote(
+    ref.read(newNoteViewModelProvider.notifier).createOrEditNote(
           _titleController.text,
           _contentController.text,
         );

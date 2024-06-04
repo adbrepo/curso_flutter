@@ -4,9 +4,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:riverpod_mvvm_crud/core/providers.dart';
 import 'package:riverpod_mvvm_crud/data/notes_repository.dart';
 import 'package:riverpod_mvvm_crud/entities/note.dart';
-import 'package:riverpod_mvvm_crud/presentation/notifiers/providers.dart';
+import 'package:riverpod_mvvm_crud/presentation/utils/base_screen_state.dart';
+import 'package:riverpod_mvvm_crud/presentation/viewmodels/providers.dart';
+import 'package:riverpod_mvvm_crud/presentation/viewmodels/states/notes_list_state.dart';
 
-import '../../mocks/notes.dart';
+import '../../../mocks/notes.dart';
 
 class MockNotesRepository extends Mock implements NotesRepository {}
 
@@ -37,7 +39,7 @@ void main() {
     () async {
       // Given
       final notesRepository = MockNotesRepository();
-      final listener = Listener<AsyncValue<List<Note>>>();
+      final listener = Listener<NotesListState>();
 
       when(() => notesRepository.getAllNotes()).thenAnswer(
         (_) async => mockedNotes,
@@ -47,13 +49,13 @@ void main() {
       final container = makeContainer(notesRepository);
 
       container.listen(
-        notesListProvider,
+        notesListViewModelProvider,
         listener.call,
         fireImmediately: true,
       );
 
-      // Wait for the future state to complete
-      await container.read(notesListProvider.future);
+      // Call the fetchNotes method
+      await container.read(notesListViewModelProvider.notifier).fetchNotes();
 
       // The repository should be called once
       verify(() => notesRepository.getAllNotes()).called(1);
@@ -62,11 +64,18 @@ void main() {
       verifyInOrder([
         () => listener.call(
               null,
-              const AsyncValue.loading(),
+              const NotesListState(screenState: BaseScreenState.idle()),
             ),
         () => listener.call(
-              const AsyncValue.loading(),
-              AsyncValue.data(mockedNotes),
+              const NotesListState(screenState: BaseScreenState.idle()),
+              const NotesListState(screenState: BaseScreenState.loading()),
+            ),
+        () => listener.call(
+              const NotesListState(screenState: BaseScreenState.loading()),
+              NotesListState(
+                screenState: const BaseScreenState.idle(),
+                notes: mockedNotes,
+              ),
             ),
       ]);
 
@@ -80,7 +89,7 @@ void main() {
     () async {
       // Given
       final notesRepository = MockNotesRepository();
-      final listener = Listener<AsyncValue<List<Note>>>();
+      final listener = Listener<NotesListState>();
       final exception = Exception('An error');
 
       when(() => notesRepository.getAllNotes()).thenThrow(exception);
@@ -88,15 +97,13 @@ void main() {
       final container = makeContainer(notesRepository);
 
       container.listen(
-        notesListProvider,
+        notesListViewModelProvider,
         listener.call,
         fireImmediately: true,
       );
 
-      // Wait for the future state to complete, catching the error
-      await container
-          .read(notesListProvider.future)
-          .catchError((_) => <Note>[]);
+      // Call the fetchNotes method
+      await container.read(notesListViewModelProvider.notifier).fetchNotes();
 
       // The repository should be called once
       verify(() => notesRepository.getAllNotes()).called(1);
@@ -105,11 +112,17 @@ void main() {
       verifyInOrder([
         () => listener.call(
               null,
-              const AsyncValue.loading(),
+              const NotesListState(screenState: BaseScreenState.idle()),
             ),
         () => listener.call(
-              const AsyncValue.loading(),
-              any(that: isA<AsyncError>()),
+              const NotesListState(screenState: BaseScreenState.idle()),
+              const NotesListState(screenState: BaseScreenState.loading()),
+            ),
+        () => listener.call(
+              const NotesListState(screenState: BaseScreenState.loading()),
+              NotesListState(
+                screenState: BaseScreenState.error(exception.toString()),
+              ),
             ),
       ]);
 
@@ -123,7 +136,7 @@ void main() {
     () async {
       // Given
       final notesRepository = MockNotesRepository();
-      final listener = Listener<AsyncValue<List<Note>>>();
+      final listener = Listener<NotesListState>();
 
       when(() => notesRepository.getAllNotes()).thenAnswer(
         (_) async => mockedNotes,
@@ -132,16 +145,16 @@ void main() {
       final container = makeContainer(notesRepository);
 
       container.listen(
-        notesListProvider,
+        notesListViewModelProvider,
         listener.call,
         fireImmediately: true,
       );
 
-      // Wait for the initial state to complete
-      await container.read(notesListProvider.future);
+      // Call the fetchNotes method
+      await container.read(notesListViewModelProvider.notifier).fetchNotes();
 
-      // When refreshing the notes
-      await container.read(notesListProvider.notifier).refresh();
+      // When refreshing the notes...
+      await container.read(notesListViewModelProvider.notifier).refresh();
 
       // The repository should be called twice
       verify(() => notesRepository.getAllNotes()).called(2);
@@ -151,20 +164,29 @@ void main() {
         // Initial states
         () => listener.call(
               null,
-              const AsyncValue.loading(),
+              const NotesListState(screenState: BaseScreenState.idle()),
             ),
         () => listener.call(
-              const AsyncValue.loading(),
-              AsyncValue.data(mockedNotes),
+              const NotesListState(screenState: BaseScreenState.idle()),
+              const NotesListState(screenState: BaseScreenState.loading()),
+            ),
+        () => listener.call(
+              const NotesListState(screenState: BaseScreenState.loading()),
+              NotesListState(
+                screenState: const BaseScreenState.idle(),
+                notes: mockedNotes,
+              ),
             ),
         // From here, the refresh states
         () => listener.call(
-              AsyncValue.data(mockedNotes),
-              any(that: isA<AsyncLoading<List<Note>>>()),
-            ),
-        () => listener.call(
-              any(that: isA<AsyncLoading<List<Note>>>()),
-              AsyncValue.data(mockedNotes),
+              NotesListState(
+                screenState: const BaseScreenState.idle(),
+                notes: mockedNotes,
+              ),
+              NotesListState(
+                screenState: const BaseScreenState.idle(),
+                notes: mockedNotes,
+              ),
             ),
       ]);
 
@@ -178,7 +200,7 @@ void main() {
     () async {
       // Given
       final notesRepository = MockNotesRepository();
-      final listener = Listener<AsyncValue<List<Note>>>();
+      final listener = Listener<NotesListState>();
 
       const noteIdToDelete = 1;
 
@@ -194,16 +216,18 @@ void main() {
       final container = makeContainer(notesRepository);
 
       container.listen(
-        notesListProvider,
+        notesListViewModelProvider,
         listener.call,
         fireImmediately: true,
       );
 
-      // Wait for the initial state to complete
-      await container.read(notesListProvider.future);
+      // Call the fetchNotes method
+      await container.read(notesListViewModelProvider.notifier).fetchNotes();
 
-      // When deleting the note
-      await container.read(notesListProvider.notifier).delete(noteIdToDelete);
+      // When deleting the note...
+      await container
+          .read(notesListViewModelProvider.notifier)
+          .delete(noteIdToDelete);
 
       // Verify the interactions with the repository
       verify(() => notesRepository.getAllNotes()).called(1);
@@ -214,20 +238,39 @@ void main() {
         // Initial states
         () => listener.call(
               null,
-              const AsyncValue.loading(),
+              const NotesListState(screenState: BaseScreenState.idle()),
             ),
         () => listener.call(
-              const AsyncValue.loading(),
-              AsyncValue.data(mockedNotes),
+              const NotesListState(screenState: BaseScreenState.idle()),
+              const NotesListState(screenState: BaseScreenState.loading()),
+            ),
+        () => listener.call(
+              const NotesListState(screenState: BaseScreenState.loading()),
+              NotesListState(
+                screenState: const BaseScreenState.idle(),
+                notes: mockedNotes,
+              ),
             ),
         // From here, the delete states
         () => listener.call(
-              AsyncValue.data(mockedNotes),
-              any(that: isA<AsyncLoading<List<Note>>>()),
+              NotesListState(
+                screenState: const BaseScreenState.idle(),
+                notes: mockedNotes,
+              ),
+              NotesListState(
+                screenState: const BaseScreenState.loading(),
+                notes: mockedNotes,
+              ),
             ),
         () => listener.call(
-              any(that: isA<AsyncLoading<List<Note>>>()),
-              any(that: isA<AsyncData<List<Note>>>()),
+              NotesListState(
+                screenState: const BaseScreenState.loading(),
+                notes: mockedNotes,
+              ),
+              NotesListState(
+                screenState: const BaseScreenState.idle(),
+                notes: mockedNotes,
+              ),
             ),
       ]);
 
