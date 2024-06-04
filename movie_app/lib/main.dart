@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:movie_app/core/app_router.dart';
-import 'package:movie_app/screens/movies_screen.dart';
 
 void main() {
   runApp(const MainApp());

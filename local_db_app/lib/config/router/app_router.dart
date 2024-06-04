@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
-import 'package:movie_app/presentation/screens/movie_detail_screen.dart';
-import 'package:movie_app/presentation/screens/movies_screen.dart';
+
+import '../../presentation/screens/movie_detail_screen.dart';
+import '../../presentation/screens/movies_screen.dart';
 
 final appRouter = GoRouter(
   routes: [
@@ -16,21 +17,9 @@ final appRouter = GoRouter(
         // movieId as path parameter, like this: /movie-details/1
         final movieId = state.pathParameters['movieId'];
         return MovieDetailScreen(
-          movieId: movieId!,
+          movieId: int.tryParse(movieId.toString()) ?? -1,
         );
       },
     ),
   ],
 );
-
-
-/*
- GoRoute(
-              path: 'movie/:id',
-              name: MovieScreen.screenName,
-              builder: (context, state) {
-                return MovieScreen(
-                    movieId: state.pathParameters['id'] ?? 'no-id');
-              })
-        ]),
-*/

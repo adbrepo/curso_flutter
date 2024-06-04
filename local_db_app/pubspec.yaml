@@ -1,0 +1,29 @@
+name: local_db_app
+description: "A new Flutter project."
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.3.4 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  go_router: ^14.0.2
+  sqflite: ^2.3.3+1
+  floor: ^1.4.2
+  cached_network_image: ^3.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  floor_generator: ^1.4.2
+  build_runner: ^2.1.2
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/movies.json
+    - assets/genres.json
