@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod_mvvm_crud/data/fake_notes_repository.dart';
-import 'package:riverpod_mvvm_crud/entities/note.dart';
+import 'package:riverpod_mvvm_crud/domain/note.dart';
 
 void main() {
   test('getAllNotes returns a list of notes', () async {

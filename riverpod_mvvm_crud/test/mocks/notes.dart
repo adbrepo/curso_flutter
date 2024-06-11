@@ -1,4 +1,4 @@
-import 'package:riverpod_mvvm_crud/entities/note.dart';
+import 'package:riverpod_mvvm_crud/domain/note.dart';
 
 final List<Note> mockedNotes = [
   Note(

@@ -35,8 +35,11 @@ class _NewNoteScreenState extends ConsumerState<NewNoteScreen> {
   void initState() {
     super.initState();
 
+    // Fetch the note details if we are editing an existing note after the first frame is rendered
     if (widget.noteId != null) {
-      ref.read(newNoteViewModelProvider.notifier).fetchNote(widget.noteId!);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(newNoteViewModelProvider.notifier).fetchNote(widget.noteId!);
+      });
     }
 
     // Clear the text fields when the user taps in

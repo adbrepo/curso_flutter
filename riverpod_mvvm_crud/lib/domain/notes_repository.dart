@@ -1,4 +1,4 @@
-import '../entities/note.dart';
+import 'note.dart';
 
 abstract interface class NotesRepository {
   Future<List<Note>> getAllNotes();

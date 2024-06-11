@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
-import '../../../data/notes_repository.dart';
-import '../../../entities/note.dart';
+import '../../../domain/notes_repository.dart';
+import '../../../domain/note.dart';
 import '../../utils/base_screen_state.dart';
 import '../states/new_note_state.dart';
 
@@ -14,8 +14,8 @@ class NewNoteNotifier extends AutoDisposeNotifier<NewNoteState> {
 
   @override
   NewNoteState build() {
-    return NewNoteState(
-      screenState: const BaseScreenState.loading(),
+    return const NewNoteState(
+      screenState: BaseScreenState.idle(),
     );
   }
 
@@ -34,6 +34,7 @@ class NewNoteNotifier extends AutoDisposeNotifier<NewNoteState> {
     } catch (error) {
       state = state.copyWith(
         screenState: BaseScreenState.error(error.toString()),
+        isEditing: false,
       );
     }
   }
@@ -85,6 +86,7 @@ class NewNoteNotifier extends AutoDisposeNotifier<NewNoteState> {
       await task;
       state = state.copyWith(
         screenState: const BaseScreenState.idle(),
+        //note: note,
         wasCreated: true,
       );
     } catch (error) {

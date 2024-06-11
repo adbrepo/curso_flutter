@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/app_router.dart';
-import '../../entities/note.dart';
+import '../../domain/note.dart';
 import '../utils/base_screen_state.dart';
 import '../viewmodels/providers.dart';
 import '../widgets/note_item.dart';
@@ -25,7 +25,10 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
   void initState() {
     super.initState();
 
-    ref.read(notesListViewModelProvider.notifier).fetchNotes();
+    // Fetch notes after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(notesListViewModelProvider.notifier).fetchNotes();
+    });
   }
 
   @override

@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 
-import '../entities/note.dart';
-import 'notes_repository.dart';
+import '../domain/note.dart';
+import '../domain/notes_repository.dart';
 
 class FakeNotesRepository implements NotesRepository {
   final List<Note> _notes = [

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/app_router.dart';
-import '../../entities/note.dart';
+import '../../domain/note.dart';
 import '../utils/base_screen_state.dart';
 import '../viewmodels/providers.dart';
 import '../utils/formatter.dart';
@@ -28,9 +28,12 @@ class _NoteDetailsScreenState extends ConsumerState<NoteDetailsScreen> {
   void initState() {
     super.initState();
 
-    ref
-        .read(noteDetailsViewModelProvider(widget.noteId).notifier)
-        .fetchNote(widget.noteId);
+    // Fetch the note details after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(noteDetailsViewModelProvider(widget.noteId).notifier)
+          .fetchNote(widget.noteId);
+    });
   }
 
   @override

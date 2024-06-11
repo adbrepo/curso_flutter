@@ -1,7 +1,9 @@
-import '../../../entities/note.dart';
+import 'package:equatable/equatable.dart';
+
+import '../../../domain/note.dart';
 import '../../utils/base_screen_state.dart';
 
-class NewNoteState {
+class NewNoteState extends Equatable {
   final BaseScreenState screenState;
   final Note? note;
   final bool titleError;
@@ -10,7 +12,7 @@ class NewNoteState {
   // Used as an event flag to notify the user that the note was created
   final bool wasCreated;
 
-  NewNoteState({
+  const NewNoteState({
     this.screenState = const BaseScreenState.idle(),
     this.note,
     this.titleError = false,
@@ -36,4 +38,14 @@ class NewNoteState {
       wasCreated: wasCreated ?? this.wasCreated,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        screenState,
+        note,
+        titleError,
+        contentError,
+        isEditing,
+        wasCreated,
+      ];
 }

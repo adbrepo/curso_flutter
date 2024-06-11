@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../entities/note.dart';
+import '../../domain/note.dart';
 import '../utils/formatter.dart';
 
 class NoteItem extends StatelessWidget {

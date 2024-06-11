@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
-import '../../../data/notes_repository.dart';
+import '../../../domain/notes_repository.dart';
 import '../../utils/base_screen_state.dart';
 import '../states/notes_list_state.dart';
 

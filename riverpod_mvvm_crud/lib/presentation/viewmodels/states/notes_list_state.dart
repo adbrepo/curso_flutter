@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../entities/note.dart';
+import '../../../domain/note.dart';
 import '../../utils/base_screen_state.dart';
 
 class NotesListState extends Equatable {

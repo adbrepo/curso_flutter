@@ -6,7 +6,7 @@ import 'package:riverpod_mvvm_crud/domain/notes_repository.dart';
 import 'package:riverpod_mvvm_crud/domain/note.dart';
 import 'package:riverpod_mvvm_crud/presentation/utils/base_screen_state.dart';
 import 'package:riverpod_mvvm_crud/presentation/viewmodels/providers.dart';
-import 'package:riverpod_mvvm_crud/presentation/viewmodels/states/note_details_state.dart';
+import 'package:riverpod_mvvm_crud/presentation/viewmodels/states/new_note_state.dart';
 
 import '../../../mocks/notes.dart';
 
@@ -32,6 +32,15 @@ void main() {
   setUp(() {
     registerFallbackValue(const AsyncLoading<void>());
     registerFallbackValue(const AsyncData<Note?>(null));
+    registerFallbackValue(
+      Note(
+        id: 1,
+        title: 'Title',
+        content: 'Content',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+    );
   });
 
   test(
@@ -39,7 +48,7 @@ void main() {
     () async {
       // Given
       final notesRepository = MockNotesRepository();
-      final listener = Listener<NoteDetailsState>();
+      final listener = Listener<NewNoteState>();
       const noteId = 1;
 
       final expectedNote = mockedNotes.firstWhere((note) => note.id == noteId);
@@ -52,15 +61,13 @@ void main() {
       final container = makeContainer(notesRepository);
 
       container.listen(
-        noteDetailsViewModelProvider(noteId),
+        newNoteViewModelProvider,
         listener.call,
         fireImmediately: true,
       );
 
       // Wait for the future state to complete
-      await container
-          .read(noteDetailsViewModelProvider(noteId).notifier)
-          .fetchNote(noteId);
+      await container.read(newNoteViewModelProvider.notifier).fetchNote(noteId);
 
       // The repository should be called once with the noteId
       verify(() => notesRepository.getNoteById(noteId)).called(1);
@@ -69,16 +76,23 @@ void main() {
       verifyInOrder([
         () => listener.call(
               null,
-              const NoteDetailsState(screenState: BaseScreenState.idle()),
+              const NewNoteState(screenState: BaseScreenState.idle()),
             ),
         () => listener.call(
-              const NoteDetailsState(screenState: BaseScreenState.idle()),
-              const NoteDetailsState(screenState: BaseScreenState.loading()),
+              const NewNoteState(screenState: BaseScreenState.idle()),
+              const NewNoteState(
+                screenState: BaseScreenState.loading(),
+                isEditing: true,
+              ),
             ),
         () => listener.call(
-              const NoteDetailsState(screenState: BaseScreenState.loading()),
-              NoteDetailsState(
+              const NewNoteState(
+                screenState: BaseScreenState.loading(),
+                isEditing: true,
+              ),
+              NewNoteState(
                 screenState: const BaseScreenState.idle(),
+                isEditing: true,
                 note: expectedNote,
               ),
             ),
@@ -94,7 +108,7 @@ void main() {
     () async {
       // Given
       final notesRepository = MockNotesRepository();
-      final listener = Listener<NoteDetailsState>();
+      final listener = Listener<NewNoteState>();
       const noteId = 1;
       final exception = Exception('An error occurred');
 
@@ -103,15 +117,13 @@ void main() {
       final container = makeContainer(notesRepository);
 
       container.listen(
-        noteDetailsViewModelProvider(noteId),
+        newNoteViewModelProvider,
         listener.call,
         fireImmediately: true,
       );
 
       // Wait for the future state to complete
-      await container
-          .read(noteDetailsViewModelProvider(noteId).notifier)
-          .fetchNote(noteId);
+      await container.read(newNoteViewModelProvider.notifier).fetchNote(noteId);
 
       // The repository should be called once with the noteId
       verify(() => notesRepository.getNoteById(noteId)).called(1);
@@ -120,15 +132,21 @@ void main() {
       verifyInOrder([
         () => listener.call(
               null,
-              const NoteDetailsState(screenState: BaseScreenState.idle()),
+              const NewNoteState(screenState: BaseScreenState.idle()),
             ),
         () => listener.call(
-              const NoteDetailsState(screenState: BaseScreenState.idle()),
-              const NoteDetailsState(screenState: BaseScreenState.loading()),
+              const NewNoteState(screenState: BaseScreenState.idle()),
+              const NewNoteState(
+                screenState: BaseScreenState.loading(),
+                isEditing: true,
+              ),
             ),
         () => listener.call(
-              const NoteDetailsState(screenState: BaseScreenState.loading()),
-              NoteDetailsState(
+              const NewNoteState(
+                screenState: BaseScreenState.loading(),
+                isEditing: true,
+              ),
+              NewNoteState(
                 screenState: BaseScreenState.error(exception.toString()),
               ),
             ),
@@ -140,81 +158,102 @@ void main() {
   );
 
   test(
-    'Delete removes the note from the list',
+    'CreateOrEdit creates the note when the note is valid',
     () async {
       // Given
       final notesRepository = MockNotesRepository();
-      final listener = Listener<NoteDetailsState>();
-      const noteId = 1;
+      final listener = Listener<NewNoteState>();
 
-      final expectedNote = mockedNotes.firstWhere((note) => note.id == noteId);
-
-      when(() => notesRepository.getNoteById(noteId)).thenAnswer(
-        (_) async => expectedNote,
-      );
-      when(() => notesRepository.deleteNoteById(noteId)).thenAnswer(
-        (_) async {
-          mockedNotes.removeWhere((note) => note.id == noteId);
-        },
-      );
+      when(() => notesRepository.insertNote(any())).thenAnswer((_) async {});
 
       final container = makeContainer(notesRepository);
 
       container.listen(
-        noteDetailsViewModelProvider(noteId),
+        newNoteViewModelProvider,
         listener.call,
         fireImmediately: true,
       );
 
-      // Wait for the future state to complete
-      await container
-          .read(noteDetailsViewModelProvider(noteId).notifier)
-          .fetchNote(noteId);
-
       // When deleting the note
-      await container
-          .read(noteDetailsViewModelProvider(noteId).notifier)
-          .delete(noteId);
+      //final expectedNote = Note(title: 'Title', content: 'Content');
+      await container.read(newNoteViewModelProvider.notifier).createOrEditNote(
+            'Title',
+            'Content',
+          );
 
       // Verify the interactions with the repository
-      verify(() => notesRepository.getNoteById(noteId)).called(1);
-      verify(() => notesRepository.deleteNoteById(noteId)).called(1);
+      verify(() => notesRepository.insertNote(any())).called(1);
 
       // The initial state should be AsyncLoading and then the mocked notes
       verifyInOrder([
         () => listener.call(
               null,
-              const NoteDetailsState(screenState: BaseScreenState.idle()),
+              const NewNoteState(screenState: BaseScreenState.idle()),
             ),
         () => listener.call(
-              const NoteDetailsState(screenState: BaseScreenState.idle()),
-              const NoteDetailsState(screenState: BaseScreenState.loading()),
+              const NewNoteState(screenState: BaseScreenState.idle()),
+              const NewNoteState(screenState: BaseScreenState.idle()),
             ),
         () => listener.call(
-              const NoteDetailsState(screenState: BaseScreenState.loading()),
-              NoteDetailsState(
-                screenState: const BaseScreenState.idle(),
-                note: expectedNote,
-              ),
+              const NewNoteState(screenState: BaseScreenState.idle()),
+              const NewNoteState(screenState: BaseScreenState.loading()),
             ),
         () => listener.call(
-              NoteDetailsState(
-                screenState: const BaseScreenState.idle(),
-                note: expectedNote,
-              ),
-              NoteDetailsState(
-                screenState: const BaseScreenState.loading(),
-                note: expectedNote,
-              ),
-            ),
-        () => listener.call(
-              NoteDetailsState(
-                screenState: const BaseScreenState.loading(),
-                note: expectedNote,
-              ),
-              const NoteDetailsState(
+              const NewNoteState(screenState: BaseScreenState.loading()),
+              const NewNoteState(
                 screenState: BaseScreenState.idle(),
-                note: null,
+                //note: expectedNote,
+                wasCreated: true,
+              ),
+            ),
+      ]);
+
+      // No more interactions
+      verifyNoMoreInteractions(listener);
+    },
+  );
+
+  test(
+    'CreateOrEdit sets error messages for invalid note',
+    () async {
+      // Given
+      final notesRepository = MockNotesRepository();
+      final listener = Listener<NewNoteState>();
+
+      when(() => notesRepository.insertNote(any())).thenAnswer((_) async {});
+
+      final container = makeContainer(notesRepository);
+
+      container.listen(
+        newNoteViewModelProvider,
+        listener.call,
+        fireImmediately: true,
+      );
+
+      // When deleting the note
+      //final expectedNote = Note(title: 'Title', content: 'Content');
+      await container.read(newNoteViewModelProvider.notifier).createOrEditNote(
+            '',
+            'Content',
+          );
+
+      // Verify the interactions with the repository
+      verifyNever(() => notesRepository.insertNote(any()));
+
+      // The initial state should be AsyncLoading and then the mocked notes
+      verifyInOrder([
+        () => listener.call(
+              null,
+              const NewNoteState(screenState: BaseScreenState.idle()),
+            ),
+        () => listener.call(
+              const NewNoteState(screenState: BaseScreenState.idle()),
+              const NewNoteState(
+                screenState: BaseScreenState.error(
+                  'Please fill in all fields.',
+                ),
+                titleError: true,
+                contentError: false,
               ),
             ),
       ]);
