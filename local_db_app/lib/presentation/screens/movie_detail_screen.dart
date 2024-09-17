@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../data/json_movies_repository.dart';
 import '../../data/local_movies_repository.dart';
 import '../../domain/models/movie_detailed.dart';
+import '../../domain/repositories/movies_repository.dart';
 
 class MovieDetailScreen extends StatefulWidget {
   const MovieDetailScreen({
@@ -21,11 +22,14 @@ class MovieDetailScreen extends StatefulWidget {
 class _MovieDetailScreenState extends State<MovieDetailScreen> {
   late final Future<MovieDetailed> futureMovie;
 
+  final MoviesRepository _repository = LocalMoviesRepository();
+  //final MoviesRepository _repository = JsonMoviesRepository();
+
   @override
   void initState() {
     super.initState();
 
-    futureMovie = LocalMoviesRepository().getMovieById(widget.movieId);
+    futureMovie = _repository.getMovieById(widget.movieId);
   }
 
   @override

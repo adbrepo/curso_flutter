@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/json_movies_repository.dart';
+import '../../data/local_movies_repository.dart';
 import '../../domain/models/movie.dart';
+import '../../domain/repositories/movies_repository.dart';
 import '../widgets/movie_item.dart';
 import 'movie_detail_screen.dart';
 
@@ -32,10 +34,13 @@ class _MoviesView extends StatefulWidget {
 class _MoviesViewState extends State<_MoviesView> {
   late final Future<List<Movie>> moviesFuture;
 
+  final MoviesRepository _repository = LocalMoviesRepository();
+  //final MoviesRepository _repository = JsonMoviesRepository();
+
   @override
   void initState() {
     super.initState();
-    moviesFuture = JsonMoviesRepository().getMovies();
+    moviesFuture = _repository.getMovies();
   }
 
   @override
