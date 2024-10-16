@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/providers.dart';
+import '../../../data/providers.dart';
 import '../../../domain/notes_repository.dart';
 import '../../utils/base_screen_state.dart';
 import '../states/note_details_state.dart';

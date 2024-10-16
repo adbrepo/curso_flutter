@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:riverpod_mvvm_crud/core/providers.dart';
+import 'package:riverpod_mvvm_crud/data/providers.dart';
 import 'package:riverpod_mvvm_crud/domain/notes_repository.dart';
 import 'package:riverpod_mvvm_crud/domain/note.dart';
 import 'package:riverpod_mvvm_crud/presentation/utils/base_screen_state.dart';
