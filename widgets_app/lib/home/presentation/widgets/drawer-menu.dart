@@ -13,7 +13,7 @@ class DrawerMenu extends StatefulWidget {
 }
 
 class _DraweMenuState extends State<DrawerMenu> {
-  int selectedScreen = 0;
+  int selectedScreen = 4;
 
   @override
   Widget build(BuildContext context) {
