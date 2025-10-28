@@ -48,17 +48,9 @@ extension BaseViewStateX on BaseScreenState {
     required R Function() loading,
     required R Function() idle,
     required R Function(String error) error,
-  }) {
-    final state = this;
-    switch (state) {
-      case LoadingState():
-        return loading();
-      case IdleState():
-        return idle();
-      case ErrorState():
-        return error((state).error);
-      default:
-        throw AssertionError();
-    }
-  }
+  }) => switch (this) {
+      LoadingState() => loading(),
+      IdleState() => idle(),
+      ErrorState() => error(this.error!),
+    };
 }
