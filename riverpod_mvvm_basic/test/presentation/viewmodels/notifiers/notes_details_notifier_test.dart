@@ -5,8 +5,8 @@ import 'package:riverpod_mvvm_basic/data/providers.dart';
 import 'package:riverpod_mvvm_basic/domain/notes_repository.dart';
 import 'package:riverpod_mvvm_basic/domain/note.dart';
 import 'package:riverpod_mvvm_basic/presentation/utils/base_screen_state.dart';
+import 'package:riverpod_mvvm_basic/presentation/viewmodels/notifiers/note_details_notifier.dart';
 import 'package:riverpod_mvvm_basic/presentation/viewmodels/providers.dart';
-import 'package:riverpod_mvvm_basic/presentation/viewmodels/states/note_details_state.dart';
 
 import '../../../mocks/notes.dart';
 

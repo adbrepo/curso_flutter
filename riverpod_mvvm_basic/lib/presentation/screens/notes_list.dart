@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/app_router.dart';
 import '../../domain/note.dart';
 import '../utils/base_screen_state.dart';
+import '../viewmodels/notifiers/notes_list_notifier.dart';
 import '../viewmodels/providers.dart';
 import '../widgets/note_item.dart';
 import 'note_details.dart';
@@ -44,6 +45,8 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
             notes: state.notes,
             onRefresh: _onRefresh,
             onNoteTap: (note) => _onNoteTap(context, note.id ?? -1),
+            sortOrder: state.sortOrder,
+            onSortOrderToggle: _onSortTap,
           );
         },
         loading: () => const Center(
@@ -66,19 +69,26 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
       pathParameters: AppRouter.noteDetailsParameters(noteId),
     );
   }
+
+  void _onSortTap() {
+    ref.read(notesListViewModelProvider.notifier).toggleSortOrder();
+  }
 }
 
 class _NotesList extends StatelessWidget {
   _NotesList({
-    super.key,
     required this.notes,
     required this.onRefresh,
     required this.onNoteTap,
+    required this.sortOrder,
+    required this.onSortOrderToggle,
   });
 
   final List<Note> notes;
   final Future<void> Function() onRefresh;
   final Function(Note) onNoteTap;
+  final SortOrder sortOrder;
+  final VoidCallback onSortOrderToggle;
 
   final List<Color> _tileColors = [
     Colors.yellow[100]!,
@@ -91,19 +101,48 @@ class _NotesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      child: ListView.builder(
-        itemCount: notes.length,
-        itemBuilder: (context, index) {
-          final note = notes[index];
-          return NoteItem(
-            note: note,
-            onTap: () => onNoteTap(note),
-            backgroundColor: _tileColors[index % _tileColors.length],
-          );
-        },
-      ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: ActionChip(
+              avatar: Icon(
+                sortIcon,
+                size: 18,
+              ),
+              label: const Text('Sort'),
+              onPressed: onSortOrderToggle,
+              tooltip: sortTooltip,
+            ),
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: onRefresh,
+            child: ListView.builder(
+              itemCount: notes.length,
+              itemBuilder: (context, index) {
+                final note = notes[index];
+                return NoteItem(
+                  note: note,
+                  onTap: () => onNoteTap(note),
+                  backgroundColor: _tileColors[index % _tileColors.length],
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
+
+  IconData get sortIcon => sortOrder == SortOrder.ascending
+      ? Icons.arrow_upward
+      : Icons.arrow_downward;
+
+  String get sortTooltip => sortOrder == SortOrder.ascending
+      ? 'Oldest first'
+      : 'Newest first';
 }

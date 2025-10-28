@@ -58,7 +58,6 @@ class _NoteDetailsScreenState extends ConsumerState<NoteDetailsScreen> {
 
 class _NoteDetails extends StatelessWidget {
   const _NoteDetails({
-    super.key,
     required this.note,
   });
 

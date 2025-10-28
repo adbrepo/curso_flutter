@@ -1,7 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-import '../../../domain/note.dart';
-import '../../utils/base_screen_state.dart';
+part of '../notifiers/note_details_notifier.dart';
 
 class NoteDetailsState extends Equatable {
   final BaseScreenState screenState;
