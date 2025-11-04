@@ -103,7 +103,6 @@ class _SlidingUpMapExampleState extends State<SlidingUpMapExample> {
 
 class _Panel extends StatelessWidget {
   const _Panel({
-    super.key,
     required this.mapController,
     required this.panelController,
   });

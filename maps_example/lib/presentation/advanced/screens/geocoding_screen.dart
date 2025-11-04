@@ -28,6 +28,7 @@ class _GeocodingFullScreenState extends State<GeocodingScreen> {
     super.dispose();
 
     _mapController.dispose();
+    _geocodingController.dispose();
   }
 
   @override

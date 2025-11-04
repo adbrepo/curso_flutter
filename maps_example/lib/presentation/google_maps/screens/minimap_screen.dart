@@ -48,9 +48,7 @@ class GoogleMapsMinimapScreen extends StatelessWidget {
 }
 
 class _UtnMinimap extends StatelessWidget {
-  const _UtnMinimap({
-    super.key,
-  });
+  const _UtnMinimap();
 
   @override
   Widget build(BuildContext context) {
@@ -72,9 +70,7 @@ class _UtnMinimap extends StatelessWidget {
 }
 
 class _UtnContactInfo extends StatelessWidget {
-  const _UtnContactInfo({
-    super.key,
-  });
+  const _UtnContactInfo();
 
   @override
   Widget build(BuildContext context) {
